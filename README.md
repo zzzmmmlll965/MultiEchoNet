@@ -8,7 +8,10 @@ a4c-video-dir: Datasets for training, validation, and testing
                   ----keypoints.csv——Key point annotation information required for training and verification
 
 1、The first thing you need to do is run setup.py files, install the necessary packages, and package echonet into a library
-                                     python setup.py install 
+                                     
+                                     
+                                     
+                                  python setup.py install 
 
 2、Install the required libraries
 
@@ -18,6 +21,7 @@ a4c-video-dir: Datasets for training, validation, and testing
 3、Modify echonet/utils/segmentation.py, line 21 --data_dir
 
 4、run
+                                  
                                    python segmentation.py
 
 After the run, the following file content will be generated:
