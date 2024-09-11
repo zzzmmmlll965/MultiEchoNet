@@ -16,7 +16,7 @@ a4c-video-dir: Datasets for training, validation, and testing
 2、Install the required libraries
 
 
-                                    python setup.py install 
+                                    pip install -r requirements.txt 
 
 3、Modify echonet/utils/segmentation.py, line 21 --data_dir
 
