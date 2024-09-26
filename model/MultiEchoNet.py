@@ -6,9 +6,9 @@ from config import create_config
 from models.decoders.transformer_decoder import TransformerDecoder
 
 
-class MultiEchoNet(nn.Module):
+class multiechonet(nn.Module):
     def __init__(self, p, heads):
-        super(TransformerNet, self).__init__()
+        super(multiechonet, self).__init__()
 
         self.channels = [64, 128, 320, 512]
         self.pretrained = p.pretrained
@@ -83,7 +83,7 @@ def get_model(p):
     """return the model"""
     feat_channels = p.decoder_embed_dim
     heads = torch.nn.ModuleDict({task: get_head(p, feat_channels, task) for task in p.TASKS.NAMES})
-    model = MultiEchoNet(p, heads)
+    model = multiechonet(p, heads)
 
     return model
 
