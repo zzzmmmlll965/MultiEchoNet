@@ -15,25 +15,23 @@ import echonet
 import ast
 from echonet.common_config import run_epoch,_video_collate_fn
 from echonet.EF import cal_ef, cal_edv,cal_esv
-
+import sys
+sys.path.append("MultiEchoNet path")
+from model.MultiEchoNet import multiechonet
 @click.command("segmentation")
-@click.option("--data_dir", type=click.Path(exists=True, file_okay=False), default="D:\\medical code\\main_echo\\dynamic-master2\\a4c-video-dir1")
+@click.option("--data_dir", type=click.Path(exists=True, file_okay=False), default="Dataset path")
 @click.option("--output", type=click.Path(file_okay=False), default=None)
-@click.option("--model_name", type=click.Choice(
-    sorted(name for name in torchvision.models.segmentation.__dict__
-           if name.islower() and not name.startswith("__") and callable(torchvision.models.segmentation.__dict__[name]))),
-    default="fcn_resnet50") #deeplabv3_resnet50 fcn_resnet101 .segmentation  deeplabv3_mobilenet_v3_large  fcn_resnet50  lraspp_mobilenet_v3_large
 @click.option("--pretrained/--random", default=False)
 @click.option("--weights", type=click.Path(exists=True, dir_okay=False), default=None)
 @click.option("--run_test/--skip_test", default=True)
 @click.option("--save_video/--skip_video", default=True)
-@click.option("--num_epochs", type=int, default=1)
+@click.option("--num_epochs", type=int, default=70)
 @click.option("--lr", type=float, default=1e-5)
 @click.option("--weight_decay", type=float, default=0)
 @click.option("--lr_step_period", type=int, default=None)
 @click.option("--num_train_patients", type=int, default=None)
 @click.option("--num_workers", type=int, default=4)
-@click.option("--batch_size", type=int, default=2)
+@click.option("--batch_size", type=int, default=16)
 @click.option("--seed", type=int, default=0)
 
 def run(
@@ -102,14 +100,14 @@ def run(
     torch.manual_seed(seed)
     # Set default output directory
     if output is None:
-        output = os.path.join("output", "segmentation", "{}_{}".format(model_name, "pretrained" if pretrained else "random"))
+        output = os.path.join("output", "segmentation", "{}_{}".format("multiechonet", "pretrained" if pretrained else "random"))
     os.makedirs(output, exist_ok=True)
 
     # Set device for computations
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 根据指定的模型名称和是否使用预训练权重，创建相应的分割模型
-    model = torchvision.models.segmentation.__dict__[model_name](weights=None, aux_loss=False)
+    model = multiechonet(weights=None, aux_loss=False)
 
     #通过修改模型的最后一层分类器，将输出通道数更改为1。这是因为原始的分割模型的最后一层分类器输出的通道数通常是与类别数相等的，而在这里我们只需要进行二分类（分割与非分割），因此将输出通道数更改为1
     model.classifier[-1] = torch.nn.Conv2d(model.classifier[-1].in_channels, 1, kernel_size=model.classifier[-1].kernel_size)
@@ -236,10 +234,10 @@ def run(
                 # m2_to_3 = (y_small_p_groups[:, 1, :] + y_small_p_groups[:, 2, :] )/ 2  # 计算第二、三个点的中点
                 # midpoint = torch.norm(y_small_p_groups[:, 0, :] - m2_to_3)  # 计算第一个点到这个中点的欧氏距离
                 y_large_p_groups = y_large_p[:, 0, :, :]
-                s_to_3 = torch.norm(y_large_p_groups[:, 1, :] - y_large_p_groups[:, 2, :])  # 计算第二个点到第三个点的欧氏距离
+                s_to_3 = torch.norm(y_large_p_groups[:, 1, :] - y_large_p_groups[:, 2, :]) 
                 # a=y_large_p_groups[:, 1, :]
-                # s2_to_3 = (y_large_p_groups[:, 1, :] + y_large_p_groups[:, 2, :]) / 2  # 计算第二、三个点的中点
-                # midpoint_s = torch.norm(y_large_p_groups[:, 0, :] - s2_to_3)  # 计算第一个点到这个中点的欧氏距离
+                # s2_to_3 = (y_large_p_groups[:, 1, :] + y_large_p_groups[:, 2, :]) / 2  
+                # midpoint_s = torch.norm(y_large_p_groups[:, 0, :] - s2_to_3) 
                 # EDV, ESV, EF = cal_ef(midpoint, midpoint_s, y_large[:, 0, :, :], y_small[:, 0, :, :])
 
                 with open(os.path.join(output, "{}_dice.csv".format(split)), "w") as g:
