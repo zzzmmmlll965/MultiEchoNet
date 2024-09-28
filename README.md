@@ -31,4 +31,3 @@ best.pt: The weight checkpoint for the model with the lowest validation loss
 size.csv: Estimated size of the left ventricle per frame and an indicator of the start of the heartbeat
 vedios: A directory that contains videos with segmented overlays
 
-Some of the code is being updated continuously~~~
